@@ -62,7 +62,7 @@ class Bucket extends StatelessWidget {
             SizedBox.fromSize(size: const Size(10, 0)),
             Text(bucketName),
             const Spacer(),
-            Text("\$${Expense.formattedCost(amountCents)}"),
+            Text(Expense.formattedCost(amountCents)),
           ],
         ),
       ),

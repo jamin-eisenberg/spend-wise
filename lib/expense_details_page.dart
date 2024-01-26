@@ -21,7 +21,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
   late final centsCost = TextEditingController(
       text: widget.expense == null
           ? ""
-          : Expense.formattedCost(widget.expense!.centsCost));
+          : Expense.formattedCost(widget.expense!.centsCost, false));
   late DateTime forMonth = widget.expense?.forMonth ??
       DateTime(DateTime.now().year, DateTime.now().month);
   late String? selectedBucketId =
@@ -86,10 +86,10 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.number,
                   onTapOutside: (_) => centsCost.text =
-                      Expense.formattedCostString(centsCost.text),
+                      Expense.formattedCostString(centsCost.text, false),
                   controller: centsCost,
                   validator: (amount) {
-                    if (RegExp(r"[\d,]+(\.\d{2})?")
+                    if (RegExp(r"-?[\d,]+(\.\d{2})?")
                             .firstMatch(centsCost.text)?[0] ==
                         centsCost.text) {
                       return null;

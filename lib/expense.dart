@@ -62,29 +62,88 @@ class Expense extends StatelessWidget {
         id: id);
   }
 
-  static Future<String> insert(Expense expense) {
-    print("Inserting $expense...");
-    return Expense.dbCollection.add(expense).then((value) {
-      expense.id = value.id;
-      return value.id;
+  static updateBucketCents(
+      Transaction transaction, String bucketId, num positiveDiff) async {
+    var bucketDoc = Bucket.dbCollection.doc(bucketId);
+    var bucket = (await transaction.get(bucketDoc)).data()!;
+
+    transaction.set(
+        bucketDoc,
+        Bucket(
+                bucketName: bucket.bucketName,
+                amountCents: bucket.amountCents + positiveDiff,
+                iconData: bucket.icon.icon!));
+  }
+
+  static Future<String> insert(Expense expense) async {
+    return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      await updateBucketCents(transaction, expense.bucketId, -expense.centsCost);
+
+      var newExpenseDoc = Expense.dbCollection.doc();
+      transaction.set(newExpenseDoc, expense);
+      expense.id = newExpenseDoc.id;
+
+      return newExpenseDoc.id;
     });
   }
 
-  Future<String> update(Expense newExpense) {
-    return Expense.dbCollection.doc(id).set(newExpense).then((value) => id);
+  Future<String> update(Expense newExpense) async {
+    return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      var bucket1Doc = Bucket.dbCollection.doc(bucketId);
+      var bucket1 = (await transaction.get(bucket1Doc)).data()!;
+      var bucket2Doc = Bucket.dbCollection.doc(newExpense.bucketId);
+      var bucket2 = (await transaction.get(bucket2Doc)).data()!;
+
+      if (bucketId == newExpense.bucketId) {
+        transaction.set(
+            bucket2Doc,
+            Bucket(
+                bucketName: bucket2.bucketName,
+                amountCents: bucket2.amountCents - newExpense.centsCost +
+                    centsCost,
+                iconData: bucket2.icon.icon!));
+      } else {
+        transaction.set(
+            bucket1Doc,
+            Bucket(
+                bucketName: bucket1.bucketName,
+                amountCents: bucket1.amountCents + centsCost,
+                iconData: bucket1.icon.icon!));
+
+        transaction.set(
+            bucket2Doc,
+            Bucket(
+                bucketName: bucket2.bucketName,
+                amountCents: bucket2.amountCents - newExpense.centsCost,
+                iconData: bucket2.icon.icon!));
+      }
+
+      transaction.update(Expense.dbCollection.doc(id), newExpense.toJson());
+      newExpense.id = id;
+
+      return id;
+    });
   }
 
-  Future<void> remove() {
-    return Expense.dbCollection.doc(id).delete();
+  Future<void> remove() async {
+    return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      await updateBucketCents(transaction, bucketId, centsCost);
+
+      transaction.delete(Expense.dbCollection.doc(id));
+
+      return;
+    });
   }
 
-  static String formattedCost(num centsCost) {
+  static String formattedCost(num centsCost, [dollarSign = true]) {
     return formattedCostString(
-        "${centsCost ~/ 100}.${"${centsCost % 100}".padLeft(2, "0")}");
+        "${centsCost < 0 ? "-" : ""}${centsCost ~/ 100}.${centsCost.remainder(100).abs().toString().padLeft(2, "0")}",
+        dollarSign);
   }
 
-  static String formattedCostString(String centsCost) {
-    final text = centsCost.replaceAll(",", "");
+  static String formattedCostString(String centsCost, [dollarSign = true]) {
+    final negativeSign = centsCost.startsWith("-");
+    final text = centsCost.replaceAll(RegExp(r"[,-]"), "");
     final splitText = text.split(".");
     final dollarsText = splitText[0].codeUnits;
     final centsText = splitText.elementAtOrNull(1);
@@ -96,7 +155,7 @@ class Expense extends StatelessWidget {
         .toList()
         .reversed;
 
-    return "${dollarsChunks.join(",")}${centsText != null ? ".$centsText" : ""}";
+    return "${negativeSign ? "-" : ""}${dollarSign ? "\$" : ""}${dollarsChunks.join(",")}${centsText != null ? ".$centsText" : ""}";
   }
 
   @override
@@ -134,7 +193,7 @@ class Expense extends StatelessWidget {
             child: ListTile(
               title: Row(
                 children: [
-                  Text("\$${formattedCost(centsCost)}"),
+                  Text("${formattedCost(centsCost)}"),
                   const Spacer(),
                   Text(
                       "${forMonth.month.toString().padLeft(2, "0")}/${forMonth.year}"),

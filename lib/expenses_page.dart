@@ -33,7 +33,7 @@ class ExpensesPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newExpense = await Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (s) => const ExpenseDetailsPage(updateDb: Expense.insert),
