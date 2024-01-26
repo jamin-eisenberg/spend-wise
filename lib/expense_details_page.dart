@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:spend_wise/app_state.dart';
 import 'package:spend_wise/expense.dart';
 
 import 'bucket.dart';
 
 class ExpenseDetailsPage extends StatefulWidget {
   final Expense? expense;
-  final List<Bucket> possibleBuckets;
-  final void Function(Expense, Expense) setExpense;
+  final Future<String> Function(Expense expense) updateDb;
 
-  const ExpenseDetailsPage(
-      {super.key,
-      this.expense,
-      required this.possibleBuckets,
-      required this.setExpense});
+  const ExpenseDetailsPage({super.key, this.expense, required this.updateDb});
 
   @override
   State<ExpenseDetailsPage> createState() => _ExpenseDetailsPageState();
@@ -21,12 +18,14 @@ class ExpenseDetailsPage extends StatefulWidget {
 
 class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
   late final name = TextEditingController(text: widget.expense?.name ?? "");
-  late final centsCost =
-      TextEditingController(text: widget.expense == null ? "" : Expense.formattedCost(widget.expense!.centsCost));
+  late final centsCost = TextEditingController(
+      text: widget.expense == null
+          ? ""
+          : Expense.formattedCost(widget.expense!.centsCost));
   late DateTime forMonth = widget.expense?.forMonth ??
       DateTime(DateTime.now().year, DateTime.now().month);
-  late Bucket selectedBucket =
-      widget.expense?.bucket ?? widget.possibleBuckets[0];
+  late String? selectedBucketId =
+      widget.expense?.bucketId;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -44,18 +43,19 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                     int.parse(centsCost.text.replaceAll(RegExp(r"[,.]"), ""));
                 final cost = costHasCents ? rawCost : rawCost * 100;
 
+                final expense = Expense(
+                  name: name.text,
+                  centsCost: cost,
+                  bucketId: selectedBucketId!,
+                  forMonth: forMonth,
+                  created: DateTime.now(),
+                  lastModified: DateTime.now(),
+                );
+
+                widget.updateDb(expense).then((value) => expense.id = value);
+
                 Navigator.pop(
                   context,
-                  Expense(
-                    name: name.text,
-                    centsCost: cost,
-                    bucket: selectedBucket,
-                    forMonth: forMonth,
-                    created: DateTime.now(),
-                    lastModified: DateTime.now(),
-                    possibleBuckets: widget.possibleBuckets,
-                    setExpense: widget.setExpense,
-                  ),
                 );
               }
             },
@@ -104,21 +104,23 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
               const Text("Bucket: "),
               SizedBox.fromSize(size: const Size(10, 0)),
               Expanded(
-                child: DropdownButtonFormField(
-                    value: selectedBucket,
-                    items: widget.possibleBuckets
-                        .map((b) => DropdownMenuItem(value: b, child: Text(b.bucketName)))
-                        .toList(),
-                    validator: (bucket) {
-                      if (bucket == null) {
-                        return "Bucket must not be empty.";
-                      } else {
-                        return null;
-                      }
-                    },
-                    onChanged: (bucket) => setState(() {
-                          selectedBucket = bucket ?? selectedBucket;
-                        })),
+                child: Consumer<ApplicationState>(
+                    builder: (_, appState, __) => DropdownButtonFormField(
+                        value: appState.buckets.where((element) => selectedBucketId == element.id).firstOrNull,
+                        items: appState.buckets
+                            .map((b) => DropdownMenuItem(
+                                value: b, child: Text(b.bucketName)))
+                            .toList(),
+                        validator: (bucket) {
+                          if (bucket == null) {
+                            return "Bucket must not be empty.";
+                          } else {
+                            return null;
+                          }
+                        },
+                        onChanged: (bucket) => setState(() {
+                              selectedBucketId = bucket?.id ?? selectedBucketId;
+                            }))),
               )
             ]),
             Row(children: [

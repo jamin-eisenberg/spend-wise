@@ -1,44 +1,48 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spend_wise/app_state.dart';
 
 import 'bucket.dart';
 import 'expense_details_page.dart';
 
 class Expense extends StatelessWidget {
   final num centsCost;
-  final Bucket bucket;
+  final String bucketId;
   final String? name;
 
   final DateTime forMonth;
   final DateTime lastModified;
   final DateTime created;
 
-  final void Function(Expense, Expense) setExpense;
-  final List<Bucket> possibleBuckets;
+  String id;
 
-  static final CollectionReference<Expense> dbExpensesCollection = FirebaseFirestore.instance
+  static final CollectionReference<Expense> dbCollection = FirebaseFirestore
+      .instance
       .collection('users/${FirebaseAuth.instance.currentUser!.uid}/expenses')
       .withConverter(
-          fromFirestore: (snapshot, _) => Expense.fromJson(snapshot.data() ?? {}),
+          fromFirestore: (snapshot, _) =>
+              Expense.fromJson(snapshot.data() ?? {}, snapshot.id),
           toFirestore: (e, _) => e.toJson());
 
-  const Expense(
+  Expense(
       {super.key,
       required this.centsCost,
-      required this.bucket,
+      required this.bucketId,
       required this.forMonth,
       required this.lastModified,
       required this.created,
       this.name,
-      required this.possibleBuckets,
-      required this.setExpense});
+      this.id = "not a valid expense ID"});
 
   Map<String, dynamic> toJson() {
     return {
       'centsCost': centsCost,
-      'bucket': FirebaseFirestore.instance.doc("bucket"),
+      'bucket': Bucket.dbCollection.doc(bucketId),
       'forMonth': forMonth,
       'lastModified': lastModified,
       'created': created,
@@ -46,19 +50,32 @@ class Expense extends StatelessWidget {
     };
   }
 
-  static Expense fromJson(Map<String, dynamic> json) {
+  static Expense fromJson(Map<String, dynamic> json, String id) {
     return Expense(
-        centsCost: 0,
-        bucket: Bucket(
-          bucketName: '',
-          iconData: Icons.signal_cellular_null,
-          amountCents: 0,
-        ),
-        forMonth: DateTime.now(),
-        lastModified: DateTime.now(),
-        created: DateTime.now(),
-        possibleBuckets: [],
-        setExpense: (_, __) {});
+        name: json['name'],
+        centsCost: json['centsCost'] as num,
+        bucketId:
+            (json['bucket'] as DocumentReference<Map<String, dynamic>>).id,
+        forMonth: (json['forMonth'] as Timestamp).toDate(),
+        lastModified: (json['lastModified'] as Timestamp).toDate(),
+        created: (json['created'] as Timestamp).toDate(),
+        id: id);
+  }
+
+  static Future<String> insert(Expense expense) {
+    print("Inserting $expense...");
+    return Expense.dbCollection.add(expense).then((value) {
+      expense.id = value.id;
+      return value.id;
+    });
+  }
+
+  Future<String> update(Expense newExpense) {
+    return Expense.dbCollection.doc(id).set(newExpense).then((value) => id);
+  }
+
+  Future<void> remove() {
+    return Expense.dbCollection.doc(id).delete();
   }
 
   static String formattedCost(num centsCost) {
@@ -82,13 +99,18 @@ class Expense extends StatelessWidget {
     return "${dollarsChunks.join(",")}${centsText != null ? ".$centsText" : ""}";
   }
 
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Expense{centsCost: $centsCost, bucketId: $bucketId, name: $name, forMonth: $forMonth, lastModified: $lastModified, created: $created}';
+  }
+
   bool sameAs(Object other) =>
       identical(this, other) ||
       super == other &&
           other is Expense &&
           runtimeType == other.runtimeType &&
           centsCost == other.centsCost &&
-          bucket == other.bucket &&
+          bucketId == other.bucketId &&
           name == other.name &&
           created == other.created;
 
@@ -99,17 +121,15 @@ class Expense extends StatelessWidget {
         Expanded(
           child: MaterialButton(
             onPressed: () async {
-              final newExpense = await Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (s) => ExpenseDetailsPage(
                     expense: this,
-                    possibleBuckets: possibleBuckets,
-                    setExpense: setExpense,
+                    updateDb: update,
                   ),
                 ),
               );
-              setExpense(this, newExpense);
             },
             child: ListTile(
               title: Row(
@@ -122,7 +142,12 @@ class Expense extends StatelessWidget {
               ),
               subtitle: Row(
                 children: [
-                  Text(bucket.bucketName),
+                  Consumer<ApplicationState>(
+                    builder: (_, appState, __) => Text(appState.buckets
+                        .where((b) => b.id == bucketId)
+                        .first
+                        .bucketName),
+                  ),
                   SizedBox.fromSize(
                     size: const Size(10, 0),
                   ),

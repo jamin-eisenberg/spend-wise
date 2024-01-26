@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,27 +11,31 @@ class Bucket extends StatelessWidget {
   final String bucketName;
   final num amountCents;
 
-  static final CollectionReference<Bucket> dbExpensesCollection =
+  String id;
+
+  static final CollectionReference<Bucket> dbCollection =
       FirebaseFirestore.instance
           .collection('users/${FirebaseAuth.instance.currentUser!.uid}/buckets')
           .withConverter(
               fromFirestore: (snapshot, _) =>
-                  Bucket.fromJson(snapshot.data() ?? {}),
+                  Bucket.fromJson(snapshot.data() ?? {}, snapshot.id),
               toFirestore: (b, _) => b.toJson());
 
   Bucket(
       {super.key,
       required this.bucketName,
       required this.amountCents,
-      required IconData iconData}) {
+      required IconData iconData,
+      this.id = "not a valid bucket ID"}) {
     icon = Icon(iconData);
   }
 
-  static Bucket fromJson(Map<String, dynamic> json) {
+  static Bucket fromJson(Map<String, dynamic> json, String id) {
     return Bucket(
       bucketName: json['bucketName'],
-      iconData: IconData(json['iconCodePoint']),
+      iconData: IconData(json['iconCodePoint'] as int, fontFamily: "MaterialIcons"),
       amountCents: json['amountCents'],
+      id: id,
     );
   }
 
@@ -39,6 +45,11 @@ class Bucket extends StatelessWidget {
       'iconCodePoint': icon.icon!.codePoint,
       'amountCents': amountCents,
     };
+  }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Bucket{icon: $icon, bucketName: $bucketName, amountCents: $amountCents}';
   }
 
   @override

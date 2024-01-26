@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'app_state.dart';
 import 'bucket.dart';
 import 'buckets_page.dart';
 import 'expenses_page.dart';
@@ -22,7 +23,7 @@ Future<void> main() async {
   ));
 }
 
-_router(buckets) {
+_router(buckets, expenses) {
   return GoRouter(
     routes: [
       GoRoute(
@@ -31,14 +32,16 @@ _router(buckets) {
             Consumer<ApplicationState>(builder: (context, appState, _) {
           if (appState.loggedIn) {
             return HomePage([
-              ExpensesPage(possibleBuckets: buckets),
+              ExpensesPage(buckets: buckets, expenses: expenses),
               BucketsPage(buckets: buckets)
             ]);
           } else {
             return Scaffold(
-              body: ElevatedButton(
-                  onPressed: () => context.push("/sign-in"),
-                  child: const Text("Sign in")),
+              body: Center(
+                child: ElevatedButton(
+                    onPressed: () => context.push("/sign-in"),
+                    child: const Text("Sign in")),
+              ),
             );
           }
         }),
@@ -114,59 +117,19 @@ _router(buckets) {
 }
 
 class SpendWise extends StatelessWidget {
-  final buckets = [
-    Bucket(bucketName: "House", iconData: Icons.house, amountCents: 0),
-    Bucket(bucketName: "Wedding", iconData: Icons.favorite, amountCents: 0),
-    Bucket(bucketName: "Vacation", iconData: Icons.flight_takeoff, amountCents: 0),
-    Bucket(bucketName: "Car Savings/Repairs", iconData: Icons.car_repair, amountCents: 0),
-    Bucket(bucketName: "Car Insurance", iconData: Icons.health_and_safety, amountCents: 0),
-    Bucket(bucketName: "Car Taxes", iconData: Icons.gavel, amountCents: 0),
-    Bucket(bucketName: "Invisalign", iconData: Icons.bluetooth_disabled, amountCents: 0),
-    Bucket(bucketName: "Emergency Fund", iconData: Icons.emergency, amountCents: 0),
-    Bucket(bucketName: "Retirement (Roth IRA)", iconData: Icons.elderly, amountCents: 0),
-    Bucket(bucketName: "Charity", iconData: Icons.volunteer_activism, amountCents: 0),
-  ];
-
-  SpendWise({super.key});
+  const SpendWise({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'SpendWise',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      routerConfig: _router(buckets),
-    );
-  }
-}
-
-class ApplicationState extends ChangeNotifier {
-  ApplicationState() {
-    init();
-  }
-
-  bool _loggedIn = false;
-
-  bool get loggedIn => _loggedIn;
-
-  Future<void> init() async {
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-
-    FirebaseUIAuth.configureProviders([
-      EmailAuthProvider(),
-    ]);
-
-    FirebaseAuth.instance.userChanges().listen((user) {
-      if (user != null) {
-        _loggedIn = true;
-      } else {
-        _loggedIn = false;
-      }
-      notifyListeners();
-    });
+    return Consumer<ApplicationState>(
+        builder: (context, appState, _) => MaterialApp.router(
+              title: 'SpendWise',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+                useMaterial3: true,
+              ),
+              routerConfig: _router(appState.buckets, appState.expenses),
+            ));
   }
 }
