@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'bucket.dart';
@@ -16,6 +18,12 @@ class Expense extends StatelessWidget {
   final void Function(Expense, Expense) setExpense;
   final List<Bucket> possibleBuckets;
 
+  static final CollectionReference<Expense> dbExpensesCollection = FirebaseFirestore.instance
+      .collection('users/${FirebaseAuth.instance.currentUser!.uid}/expenses')
+      .withConverter(
+          fromFirestore: (snapshot, _) => Expense.fromJson(snapshot.data() ?? {}),
+          toFirestore: (e, _) => e.toJson());
+
   const Expense(
       {super.key,
       required this.centsCost,
@@ -26,6 +34,32 @@ class Expense extends StatelessWidget {
       this.name,
       required this.possibleBuckets,
       required this.setExpense});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'centsCost': centsCost,
+      'bucket': FirebaseFirestore.instance.doc("bucket"),
+      'forMonth': forMonth,
+      'lastModified': lastModified,
+      'created': created,
+      'name': name,
+    };
+  }
+
+  static Expense fromJson(Map<String, dynamic> json) {
+    return Expense(
+        centsCost: 0,
+        bucket: Bucket(
+          bucketName: '',
+          iconData: Icons.signal_cellular_null,
+          amountCents: 0,
+        ),
+        forMonth: DateTime.now(),
+        lastModified: DateTime.now(),
+        created: DateTime.now(),
+        possibleBuckets: [],
+        setExpense: (_, __) {});
+  }
 
   static String formattedCost(num centsCost) {
     return formattedCostString(

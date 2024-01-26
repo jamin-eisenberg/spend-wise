@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:spend_wise/expense_details_page.dart';
 
@@ -8,7 +10,6 @@ class ExpensesPage extends StatefulWidget {
   final List<Bucket> possibleBuckets;
 
   const ExpensesPage({super.key, required this.possibleBuckets});
-
 
   @override
   State<ExpensesPage> createState() => _ExpensesPageState();
@@ -49,6 +50,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
     setState(() {
       _expenses.add(expense);
     });
+    Expense.dbExpensesCollection.add(expense);
   }
 
   @override

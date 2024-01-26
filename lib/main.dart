@@ -36,7 +36,9 @@ _router(buckets) {
             ]);
           } else {
             return Scaffold(
-              body: ElevatedButton(onPressed: () => context.push("/sign-in"), child: const Text("Sign in")),
+              body: ElevatedButton(
+                  onPressed: () => context.push("/sign-in"),
+                  child: const Text("Sign in")),
             );
           }
         }),
@@ -113,16 +115,16 @@ _router(buckets) {
 
 class SpendWise extends StatelessWidget {
   final buckets = [
-    Bucket(bucketName: "House", iconData: Icons.house),
-    Bucket(bucketName: "Wedding", iconData: Icons.favorite),
-    Bucket(bucketName: "Vacation", iconData: Icons.flight_takeoff),
-    Bucket(bucketName: "Car Savings/Repairs", iconData: Icons.car_repair),
-    Bucket(bucketName: "Car Insurance", iconData: Icons.health_and_safety),
-    Bucket(bucketName: "Car Taxes", iconData: Icons.gavel),
-    Bucket(bucketName: "Invisalign", iconData: Icons.bluetooth_disabled),
-    Bucket(bucketName: "Emergency Fund", iconData: Icons.emergency),
-    Bucket(bucketName: "Retirement (Roth IRA)", iconData: Icons.elderly),
-    Bucket(bucketName: "Charity", iconData: Icons.volunteer_activism),
+    Bucket(bucketName: "House", iconData: Icons.house, amountCents: 0),
+    Bucket(bucketName: "Wedding", iconData: Icons.favorite, amountCents: 0),
+    Bucket(bucketName: "Vacation", iconData: Icons.flight_takeoff, amountCents: 0),
+    Bucket(bucketName: "Car Savings/Repairs", iconData: Icons.car_repair, amountCents: 0),
+    Bucket(bucketName: "Car Insurance", iconData: Icons.health_and_safety, amountCents: 0),
+    Bucket(bucketName: "Car Taxes", iconData: Icons.gavel, amountCents: 0),
+    Bucket(bucketName: "Invisalign", iconData: Icons.bluetooth_disabled, amountCents: 0),
+    Bucket(bucketName: "Emergency Fund", iconData: Icons.emergency, amountCents: 0),
+    Bucket(bucketName: "Retirement (Roth IRA)", iconData: Icons.elderly, amountCents: 0),
+    Bucket(bucketName: "Charity", iconData: Icons.volunteer_activism, amountCents: 0),
   ];
 
   SpendWise({super.key});
