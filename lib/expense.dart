@@ -86,9 +86,11 @@ class Expense extends StatelessWidget {
     transaction.set(
         bucketDoc,
         Bucket(
-            name: bucket.name,
-            amountCents: bucket.amountCents + positiveDiff,
-            iconData: bucket.icon.icon!));
+          name: bucket.name,
+          amountCents: bucket.amountCents + positiveDiff,
+          iconData: bucket.icon.icon!,
+          perMonthAmountCents: bucket.perMonthAmountCents,
+        ));
   }
 
   static Future<String> insert(Expense expense) async {
@@ -115,24 +117,30 @@ class Expense extends StatelessWidget {
         transaction.set(
             bucket2Doc,
             Bucket(
-                name: bucket2.name,
-                amountCents:
-                    bucket2.amountCents - newExpense.centsCost + centsCost,
-                iconData: bucket2.icon.icon!));
+              name: bucket2.name,
+              amountCents:
+                  bucket2.amountCents - newExpense.centsCost + centsCost,
+              iconData: bucket2.icon.icon!,
+              perMonthAmountCents: bucket2.perMonthAmountCents,
+            ));
       } else {
         transaction.set(
             bucket1Doc,
             Bucket(
-                name: bucket1.name,
-                amountCents: bucket1.amountCents + centsCost,
-                iconData: bucket1.icon.icon!));
+              name: bucket1.name,
+              amountCents: bucket1.amountCents + centsCost,
+              iconData: bucket1.icon.icon!,
+              perMonthAmountCents: bucket1.perMonthAmountCents,
+            ));
 
         transaction.set(
             bucket2Doc,
             Bucket(
-                name: bucket2.name,
-                amountCents: bucket2.amountCents - newExpense.centsCost,
-                iconData: bucket2.icon.icon!));
+              name: bucket2.name,
+              amountCents: bucket2.amountCents - newExpense.centsCost,
+              iconData: bucket2.icon.icon!,
+              perMonthAmountCents: bucket2.perMonthAmountCents,
+            ));
       }
 
       transaction.update(Expense.dbCollection.doc(id), newExpense.toJson());
@@ -206,9 +214,7 @@ class Expense extends StatelessWidget {
             builder: (_, appState, __) => Text(
                 appState.buckets.where((b) => b.id == bucketId).first.name),
           ),
-          SizedBox.fromSize(
-            size: const Size(10, 0),
-          ),
+          const SizedBox(width: 10),
           Text(name ?? ""),
         ],
       ),

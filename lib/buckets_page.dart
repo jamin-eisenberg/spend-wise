@@ -15,7 +15,7 @@ class BucketsPage extends StatelessWidget {
         title: const Text("Buckets"),
       ),
       body: Center(
-        child: Column(
+        child: ListView(
           children: buckets,
         ),
       ),

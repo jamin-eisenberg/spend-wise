@@ -69,7 +69,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
           child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Row(children: [
               const Text("Name: "),
-              SizedBox.fromSize(size: const Size(10, 0)),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextFormField(
                   controller: name,
@@ -78,7 +78,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
             ]),
             Row(children: [
               const Text("Amount: "),
-              SizedBox.fromSize(size: const Size(10, 0)),
+              const SizedBox(width: 10,),
               const Text("\$"),
               Expanded(
                 child: TextFormField(
@@ -101,7 +101,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
             ]),
             Row(children: [
               const Text("Bucket: "),
-              SizedBox.fromSize(size: const Size(10, 0)),
+              const SizedBox(width: 10),
               Expanded(
                 child: Consumer<ApplicationState>(
                     builder: (_, appState, __) => DropdownButtonFormField(
@@ -124,7 +124,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
             ]),
             Row(children: [
               const Text("For month: "),
-              SizedBox.fromSize(size: const Size(10, 0)),
+              const SizedBox(width: 10),
               MaterialButton(
                 onPressed: () {
                   showDatePicker(
@@ -143,7 +143,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                 child: Row(
                   children: [
                     const Icon(Icons.calendar_month),
-                    SizedBox.fromSize(size: const Size(10, 0)),
+                    const SizedBox(width: 10),
                     Text(Month.format(forMonth)),
                   ],
                 ),
