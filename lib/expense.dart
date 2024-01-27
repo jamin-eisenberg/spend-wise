@@ -9,6 +9,7 @@ import 'package:spend_wise/app_state.dart';
 
 import 'bucket.dart';
 import 'expense_details_page.dart';
+import 'month.dart';
 
 class Expense extends StatelessWidget {
   final num centsCost;
@@ -193,10 +194,9 @@ class Expense extends StatelessWidget {
             child: ListTile(
               title: Row(
                 children: [
-                  Text("${formattedCost(centsCost)}"),
+                  Text(formattedCost(centsCost)),
                   const Spacer(),
-                  Text(
-                      "${forMonth.month.toString().padLeft(2, "0")}/${forMonth.year}"),
+                  Text(Month.format(forMonth)),
                 ],
               ),
               subtitle: Row(

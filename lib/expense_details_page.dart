@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:spend_wise/app_state.dart';
 import 'package:spend_wise/expense.dart';
 
-import 'bucket.dart';
+import 'month.dart';
 
 class ExpenseDetailsPage extends StatefulWidget {
   final Expense? expense;
@@ -145,8 +144,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                   children: [
                     const Icon(Icons.calendar_month),
                     SizedBox.fromSize(size: const Size(10, 0)),
-                    Text(
-                        "${forMonth.month.toString().padLeft(2, "0")}/${forMonth.year}")
+                    Text(Month.format(forMonth)),
                   ],
                 ),
               ),

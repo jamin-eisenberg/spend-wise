@@ -10,6 +10,7 @@ import 'package:spend_wise/expense.dart';
 
 import 'bucket.dart';
 import 'firebase_options.dart';
+import 'month.dart';
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
@@ -21,10 +22,14 @@ class ApplicationState extends ChangeNotifier {
   List<Expense> _expenses = [];
   StreamSubscription<QuerySnapshot>? _bucketsSubscription;
   List<Bucket> _buckets = [];
+  StreamSubscription<QuerySnapshot>? _monthAmountsSubscription;
+  Map<DateTime, num> _monthAmounts = {};
 
   bool get loggedIn => _loggedIn;
+
   List<Expense> get expenses => _expenses;
   List<Bucket> get buckets => _buckets;
+  Map<DateTime, num> get monthAmounts => _monthAmounts;
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -37,7 +42,8 @@ class ApplicationState extends ChangeNotifier {
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
         _loggedIn = true;
-        _expensesSubscription = Expense.dbCollection.snapshots().listen((event) {
+        _expensesSubscription =
+            Expense.dbCollection.snapshots().listen((event) {
           _expenses = event.docs.map((e) => e.data()).toList();
           log("EXPENSES: $_expenses");
           notifyListeners();
@@ -47,12 +53,23 @@ class ApplicationState extends ChangeNotifier {
           log("BUCKETS: $_buckets");
           notifyListeners();
         });
+        _monthAmountsSubscription =
+            Month.dbCollection.snapshots().listen((event) {
+          _monthAmounts = {
+            for (var json in event.docs.map((m) => m.data()))
+              json['month']: json['allAccountsTotal']
+          };
+          log("MONTH AMOUNTS: $_monthAmounts");
+          notifyListeners();
+        });
       } else {
         _loggedIn = false;
         _expenses = [];
         _expensesSubscription?.cancel();
         _buckets = [];
         _bucketsSubscription?.cancel();
+        _monthAmounts = {};
+        _monthAmountsSubscription?.cancel();
       }
       notifyListeners();
     });

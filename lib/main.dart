@@ -19,7 +19,7 @@ Future<void> main() async {
   ));
 }
 
-_router(buckets, expenses) {
+_router() {
   return GoRouter(
     routes: [
       GoRoute(
@@ -28,9 +28,12 @@ _router(buckets, expenses) {
             Consumer<ApplicationState>(builder: (context, appState, _) {
           if (appState.loggedIn) {
             return HomePage([
-              ExpensesPage(buckets: buckets, expenses: expenses),
-              BucketsPage(buckets: buckets),
-              MonthsPage(expenses: expenses),
+              ExpensesPage(
+                  buckets: appState.buckets, expenses: appState.expenses),
+              BucketsPage(buckets: appState.buckets),
+              MonthsPage(
+                  expenses: appState.expenses,
+                  monthAmounts: appState.monthAmounts),
             ]);
           } else {
             return Scaffold(
@@ -119,14 +122,13 @@ class SpendWise extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Consumer<ApplicationState>(
-        builder: (context, appState, _) => MaterialApp.router(
-              title: 'SpendWise',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-                useMaterial3: true,
-              ),
-              routerConfig: _router(appState.buckets, appState.expenses),
-            ));
+    return MaterialApp.router(
+      title: 'SpendWise',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
+      ),
+      routerConfig: _router(),
+    );
   }
 }
