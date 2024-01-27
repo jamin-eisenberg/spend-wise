@@ -28,7 +28,9 @@ class ApplicationState extends ChangeNotifier {
   bool get loggedIn => _loggedIn;
 
   List<Expense> get expenses => _expenses;
+
   List<Bucket> get buckets => _buckets;
+
   Map<DateTime, num> get monthAmounts => _monthAmounts;
 
   Future<void> init() async {
@@ -42,13 +44,18 @@ class ApplicationState extends ChangeNotifier {
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
         _loggedIn = true;
-        _expensesSubscription =
-            Expense.dbCollection.snapshots().listen((event) {
+        _expensesSubscription = Expense.dbCollection
+            .orderBy('created', descending: true)
+            .snapshots()
+            .listen((event) {
           _expenses = event.docs.map((e) => e.data()).toList();
           log("EXPENSES: $_expenses");
           notifyListeners();
         });
-        _bucketsSubscription = Bucket.dbCollection.snapshots().listen((event) {
+        _bucketsSubscription = Bucket.dbCollection
+            .orderBy('bucketName')
+            .snapshots()
+            .listen((event) {
           _buckets = event.docs.map((b) => b.data()).toList();
           log("BUCKETS: $_buckets");
           notifyListeners();
