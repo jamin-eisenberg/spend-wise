@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:spend_wise/expense.dart';
 
-import 'bucket.dart';
+class MonthsPage extends StatelessWidget {
+  final List<Expense> expenses;
 
-class BucketsPage extends StatelessWidget {
-  final List<Bucket> buckets;
-
-  const BucketsPage({super.key, required this.buckets});
+  const MonthsPage({super.key, required this.expenses});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Buckets"),
+        title: const Text("Months"),
       ),
       body: Center(
         child: Column(
-          children: buckets,
+          children: expenses,
         ),
       ),
     );

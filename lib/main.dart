@@ -1,18 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart'
-    hide EmailAuthProvider, PhoneAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
-import 'bucket.dart';
 import 'buckets_page.dart';
 import 'expenses_page.dart';
 import 'home_page.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'months_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +29,8 @@ _router(buckets, expenses) {
           if (appState.loggedIn) {
             return HomePage([
               ExpensesPage(buckets: buckets, expenses: expenses),
-              BucketsPage(buckets: buckets)
+              BucketsPage(buckets: buckets),
+              MonthsPage(expenses: expenses),
             ]);
           } else {
             return Scaffold(

@@ -35,6 +35,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.savings),
             label: 'Buckets',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Months',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
