@@ -3,35 +3,36 @@ import 'package:provider/provider.dart';
 import 'package:spend_wise/app_state.dart';
 import 'package:spend_wise/expense.dart';
 
+import 'bucket.dart';
 import 'month.dart';
 
-class ExpenseDetailsPage extends StatefulWidget {
-  final Expense? expense;
-  final Future<String> Function(Expense) updateDb;
+class BucketDetailsPage extends StatefulWidget {
+  final Bucket bucket;
+  final Future<String> Function(Bucket) updateDb;
 
-  const ExpenseDetailsPage({super.key, this.expense, required this.updateDb});
+  const BucketDetailsPage({super.key, required this.bucket, required this.updateDb});
 
   @override
-  State<ExpenseDetailsPage> createState() => _ExpenseDetailsPageState();
+  State<BucketDetailsPage> createState() => _BucketDetailsPageState();
 }
 
-class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
-  late final name = TextEditingController(text: widget.expense?.name ?? "");
+class _BucketDetailsPageState extends State<BucketDetailsPage> {
+  late final name = TextEditingController(text: widget.bucket.name ?? "");
   late final centsCost = TextEditingController(
-      text: widget.expense == null
+      text: widget.bucket == null
           ? ""
-          : Expense.formattedCost(widget.expense!.centsCost, false));
-  late DateTime forMonth = widget.expense?.forMonth ??
+          : Expense.formattedCost(widget.bucket!.centsCost, false));
+  late DateTime forMonth = widget.bucket?.forMonth ??
       DateTime(DateTime.now().year, DateTime.now().month);
   late String? selectedBucketId =
-      widget.expense?.bucketId;
+      widget.bucket?.bucketId;
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.expense?.name ?? "New Expense"),
+        title: Text(widget.bucket?.name ?? "New Expense"),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -39,7 +40,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
               if (_formKey.currentState?.validate() ?? false) {
                 final costHasCents = centsCost.text.contains(".");
                 final rawCost =
-                    int.parse(centsCost.text.replaceAll(RegExp(r"[,.]"), ""));
+                int.parse(centsCost.text.replaceAll(RegExp(r"[,.]"), ""));
                 final cost = costHasCents ? rawCost : rawCost * 100;
 
                 final expense = Expense(
@@ -89,7 +90,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                   controller: centsCost,
                   validator: (amount) {
                     if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                            .firstMatch(centsCost.text)?[0] ==
+                        .firstMatch(centsCost.text)?[0] ==
                         centsCost.text) {
                       return null;
                     } else {
@@ -108,7 +109,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                         value: appState.buckets.where((element) => selectedBucketId == element.id).firstOrNull,
                         items: appState.buckets
                             .map((b) => DropdownMenuItem(
-                                value: b, child: Text(b.name)))
+                            value: b, child: Text(b.name)))
                             .toList(),
                         validator: (bucket) {
                           if (bucket == null) {
@@ -118,8 +119,8 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                           }
                         },
                         onChanged: (bucket) => setState(() {
-                              selectedBucketId = bucket?.id ?? selectedBucketId;
-                            }))),
+                          selectedBucketId = bucket?.id ?? selectedBucketId;
+                        }))),
               )
             ]),
             Row(children: [
@@ -128,17 +129,17 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
               MaterialButton(
                 onPressed: () {
                   showDatePicker(
-                          context: context,
-                          firstDate: DateTime.now()
-                              .subtract(const Duration(days: 365)),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                          currentDate: forMonth,
-                          selectableDayPredicate: (day) => day.day == 1,
-                          errorInvalidText:
-                              "Out of range (should be a first of the month).")
+                      context: context,
+                      firstDate: DateTime.now()
+                          .subtract(const Duration(days: 365)),
+                      lastDate:
+                      DateTime.now().add(const Duration(days: 365)),
+                      currentDate: forMonth,
+                      selectableDayPredicate: (day) => day.day == 1,
+                      errorInvalidText:
+                      "Out of range (should be a first of the month).")
                       .then((value) =>
-                          setState(() => forMonth = value ?? forMonth));
+                      setState(() => forMonth = value ?? forMonth));
                 },
                 child: Row(
                   children: [

@@ -32,7 +32,7 @@ class MonthsPage extends StatelessWidget {
         child: Column(
           children: [
             for (var date
-                in getMonthsBetween(DateTime.utc(2024), DateTime.now()))
+                in getMonthsBetween(DateTime(2024), DateTime.now()))
               Month(
                 month: date,
                 expenses: expenses.where((e) => e.forMonth == date).toList(),

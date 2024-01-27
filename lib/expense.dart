@@ -20,6 +20,8 @@ class Expense extends StatelessWidget {
   final DateTime lastModified;
   final DateTime created;
 
+  final bool isReadOnly;
+
   String id;
 
   static final CollectionReference<Expense> dbCollection = FirebaseFirestore
@@ -38,7 +40,20 @@ class Expense extends StatelessWidget {
       required this.lastModified,
       required this.created,
       this.name,
-      this.id = "not a valid expense ID"});
+      this.id = "not a valid expense ID",
+      this.isReadOnly = false});
+
+  Expense toReadOnly() {
+    return Expense(
+      centsCost: centsCost,
+      bucketId: bucketId,
+      forMonth: forMonth,
+      lastModified: lastModified,
+      created: created,
+      id: id,
+      isReadOnly: true,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -71,14 +86,15 @@ class Expense extends StatelessWidget {
     transaction.set(
         bucketDoc,
         Bucket(
-                bucketName: bucket.bucketName,
-                amountCents: bucket.amountCents + positiveDiff,
-                iconData: bucket.icon.icon!));
+            name: bucket.name,
+            amountCents: bucket.amountCents + positiveDiff,
+            iconData: bucket.icon.icon!));
   }
 
   static Future<String> insert(Expense expense) async {
     return await FirebaseFirestore.instance.runTransaction((transaction) async {
-      await updateBucketCents(transaction, expense.bucketId, -expense.centsCost);
+      await updateBucketCents(
+          transaction, expense.bucketId, -expense.centsCost);
 
       var newExpenseDoc = Expense.dbCollection.doc();
       transaction.set(newExpenseDoc, expense);
@@ -99,22 +115,22 @@ class Expense extends StatelessWidget {
         transaction.set(
             bucket2Doc,
             Bucket(
-                bucketName: bucket2.bucketName,
-                amountCents: bucket2.amountCents - newExpense.centsCost +
-                    centsCost,
+                name: bucket2.name,
+                amountCents:
+                    bucket2.amountCents - newExpense.centsCost + centsCost,
                 iconData: bucket2.icon.icon!));
       } else {
         transaction.set(
             bucket1Doc,
             Bucket(
-                bucketName: bucket1.bucketName,
+                name: bucket1.name,
                 amountCents: bucket1.amountCents + centsCost,
                 iconData: bucket1.icon.icon!));
 
         transaction.set(
             bucket2Doc,
             Bucket(
-                bucketName: bucket2.bucketName,
+                name: bucket2.name,
                 amountCents: bucket2.amountCents - newExpense.centsCost,
                 iconData: bucket2.icon.icon!));
       }
@@ -176,45 +192,47 @@ class Expense extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final listTile = ListTile(
+      title: Row(
+        children: [
+          Text(formattedCost(centsCost)),
+          const Spacer(),
+          Text(Month.format(forMonth)),
+        ],
+      ),
+      subtitle: Row(
+        children: [
+          Consumer<ApplicationState>(
+            builder: (_, appState, __) => Text(
+                appState.buckets.where((b) => b.id == bucketId).first.name),
+          ),
+          SizedBox.fromSize(
+            size: const Size(10, 0),
+          ),
+          Text(name ?? ""),
+        ],
+      ),
+    );
+
     return Row(
       children: [
         Expanded(
-          child: MaterialButton(
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (s) => ExpenseDetailsPage(
-                    expense: this,
-                    updateDb: update,
-                  ),
+          child: isReadOnly
+              ? listTile
+              : MaterialButton(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (s) => ExpenseDetailsPage(
+                          expense: this,
+                          updateDb: update,
+                        ),
+                      ),
+                    );
+                  },
+                  child: listTile,
                 ),
-              );
-            },
-            child: ListTile(
-              title: Row(
-                children: [
-                  Text(formattedCost(centsCost)),
-                  const Spacer(),
-                  Text(Month.format(forMonth)),
-                ],
-              ),
-              subtitle: Row(
-                children: [
-                  Consumer<ApplicationState>(
-                    builder: (_, appState, __) => Text(appState.buckets
-                        .where((b) => b.id == bucketId)
-                        .first
-                        .bucketName),
-                  ),
-                  SizedBox.fromSize(
-                    size: const Size(10, 0),
-                  ),
-                  Text(name ?? ""),
-                ],
-              ),
-            ),
-          ),
         ),
       ],
     );

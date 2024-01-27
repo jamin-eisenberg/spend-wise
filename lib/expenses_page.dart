@@ -18,7 +18,7 @@ class ExpensesPage extends StatelessWidget {
         title: const Text("Expenses"),
       ),
       body: Center(
-        child: Column(
+        child: ListView(
           children: [
             for (var expense in expenses)
               Dismissible(

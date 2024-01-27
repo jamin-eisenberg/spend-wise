@@ -53,7 +53,7 @@ class ApplicationState extends ChangeNotifier {
           notifyListeners();
         });
         _bucketsSubscription = Bucket.dbCollection
-            .orderBy('bucketName')
+            .orderBy('name')
             .snapshots()
             .listen((event) {
           _buckets = event.docs.map((b) => b.data()).toList();
