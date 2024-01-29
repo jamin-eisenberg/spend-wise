@@ -29,7 +29,7 @@ class MonthsPage extends StatelessWidget {
         title: const Text("Months"),
       ),
       body: Center(
-        child: Column(
+        child: ListView(
           children: [
             for (var date
                 in getMonthsBetween(DateTime(2024), DateTime.now()))

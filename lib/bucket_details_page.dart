@@ -37,14 +37,14 @@ class _BucketDetailsPageState extends State<BucketDetailsPage> {
                 final perMonthAmount =
                     hasCents ? rawPerMonthAmount : rawPerMonthAmount * 100;
 
-                final expense = Bucket(
+                final bucket = Bucket(
                     name: widget.bucket.name,
                     amountCents: widget.bucket.amountCents,
                     iconData: widget.bucket.icon.icon!,
                     id: widget.bucket.id,
                     perMonthAmountCents: perMonthAmount);
 
-                widget.updateDb(expense).then((value) => expense.id = value);
+                widget.updateDb(bucket).then((value) => bucket.id = value);
 
                 Navigator.pop(
                   context,

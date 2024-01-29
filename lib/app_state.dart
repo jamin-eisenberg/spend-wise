@@ -64,7 +64,7 @@ class ApplicationState extends ChangeNotifier {
             Month.dbCollection.snapshots().listen((event) {
           _monthAmounts = {
             for (var json in event.docs.map((m) => m.data()))
-              json['month']: json['allAccountsTotal']
+              (json['month'] as Timestamp).toDate(): json['allAccountsTotal']
           };
           log("MONTH AMOUNTS: $_monthAmounts");
           notifyListeners();
