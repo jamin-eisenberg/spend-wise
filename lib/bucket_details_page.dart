@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spend_wise/app_state.dart';
 import 'package:spend_wise/expense.dart';
 
 import 'bucket.dart';
@@ -90,6 +92,17 @@ class _BucketDetailsPageState extends State<BucketDetailsPage> {
             ),
             const SizedBox(height: 20),
             const Text("History:"),
+            const SizedBox(height: 20),
+            Expanded(
+              child: Consumer<ApplicationState>(
+                builder: (_, appState, __) => ListView(
+                  children: appState.expenses
+                      .where((e) => e.bucketId == widget.bucket.id)
+                      .map((e) => e.toReadOnly())
+                      .toList(),
+                ),
+              ),
+            ),
           ],
         ),
       ),
