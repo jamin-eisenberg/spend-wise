@@ -11,7 +11,7 @@ class Month extends StatelessWidget {
   final List<Expense> expenses;
   final num? allAccountsTotal;
 
-  Month({
+  const Month({
     super.key,
     required this.month,
     required this.expenses,
@@ -60,7 +60,7 @@ class Month extends StatelessWidget {
         ),
         subtitle: allAccountsTotal == null
             ? null
-            : Text(Expense.formattedCost(allAccountsTotal!)),
+            : Text("Accounts total: ${Expense.formattedCost(allAccountsTotal!)}"),
       ),
     );
   }

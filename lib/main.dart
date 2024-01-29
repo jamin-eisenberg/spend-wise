@@ -15,7 +15,7 @@ Future<void> main() async {
 
   runApp(ChangeNotifierProvider(
     create: (context) => ApplicationState(),
-    builder: ((context, child) => SpendWise()),
+    builder: ((context, child) => const SpendWise()),
   ));
 }
 
