@@ -193,7 +193,6 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                   "This month's 'real spending': ${Expense.formattedCost((widget.month.estimatedMonthlyIncome ?? 0) - widget.month.expenses.map((e) => e.centsCost).sum + widget.month.allAccountsTotal! - widget.nextMonth!.allAccountsTotal!)}"),
           ],
           // real spending = estimated monthly income - total of input expenses + this month's account total - next month's account total
-          // amount not in any bucket = this month's account total - bucket total snapshot; not this
           // amount not in any bucket (not for a particular month) = the most recent month's total - total buckets
         ),
       ),

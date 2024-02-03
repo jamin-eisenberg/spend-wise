@@ -32,8 +32,10 @@ _router() {
                   buckets: appState.buckets, expenses: appState.expenses),
               BucketsPage(buckets: appState.buckets),
               MonthsPage(
-                  expenses: appState.expenses,
-                  months: appState.months),
+                expenses: appState.expenses,
+                months: appState.months,
+                buckets: appState.buckets,
+              ),
             ]);
           } else {
             return Scaffold(
