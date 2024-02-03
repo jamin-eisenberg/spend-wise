@@ -22,6 +22,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
   late final allAccountsTotalCents = TextEditingController(
       text: Expense.formattedCost(widget.month.allAccountsTotal ?? 0, false));
   final _formKey = GlobalKey<FormState>();
+  bool buttonPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +95,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
             ),
             const SizedBox(height: 20),
             Center(
-                child: widget.month.bucketTransferDate == null
+                child: widget.month.bucketTransferDate == null && !buttonPressed
                     ? Consumer<ApplicationState>(
                         builder: (_, appState, __) => ElevatedButton(
                             onPressed: () async {
@@ -119,11 +120,12 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
 
                                 for (final bucket in newBuckets) {
                                   transaction.update(
-                                    Bucket.dbCollection.doc(bucket.id),
-                                    bucket.toJson());
+                                      Bucket.dbCollection.doc(bucket.id),
+                                      bucket.toJson());
                                 }
 
-                                print("JAMIN: ${newBuckets.map((b) => b.toJson())}");
+                                print(
+                                    "JAMIN: ${newBuckets.map((b) => b.toJson())}");
                               });
 
                               await Month.update(Month(
@@ -132,12 +134,17 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                                 allAccountsTotal: widget.month.allAccountsTotal,
                                 bucketTransferDate: DateTime.now(),
                               ));
+
+                              setState(() {
+                                buttonPressed = true;
+                              });
                             },
                             child: const Text(
                                 "Transfer monthly amounts into each bucket")),
                       )
-                    : Text(
-                        "Bucket amount transfer completed on ${widget.month.bucketTransferDate!.toString()}")),
+                    : Text(widget.month.bucketTransferDate == null
+                        ? "Bucket amount transfer completed"
+                        : "Bucket amount transfer completed on ${widget.month.bucketTransferDate!.toString()}")),
           ],
         ),
       ),
