@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spend_wise/app_state.dart';
 import 'package:spend_wise/expense.dart';
 import 'package:spend_wise/month.dart';
+
+import 'bucket.dart';
 
 class MonthDetailsPage extends StatefulWidget {
   final Month month;
@@ -90,15 +95,47 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
             const SizedBox(height: 20),
             Center(
                 child: widget.month.bucketTransferDate == null
-                    ? ElevatedButton(
-                        onPressed: () => Month.update(Month(
-                              month: widget.month.month,
-                              expenses: [],
-                              allAccountsTotal: widget.month.allAccountsTotal,
-                              bucketTransferDate: DateTime.now(),
-                            )),
-                        child: const Text(
-                            "Transfer monthly amounts into each bucket"))
+                    ? Consumer<ApplicationState>(
+                        builder: (_, appState, __) => ElevatedButton(
+                            onPressed: () async {
+                              await FirebaseFirestore.instance
+                                  .runTransaction((transaction) async {
+                                List<Bucket> newBuckets = await Future.wait(
+                                    appState.buckets.map((bucket) async {
+                                  final bucketDoc = await transaction
+                                      .get(Bucket.dbCollection.doc(bucket.id));
+                                  final bucketData = bucketDoc.data()!;
+
+                                  return Bucket(
+                                    name: bucketData.name,
+                                    amountCents: bucketData.amountCents +
+                                        bucketData.perMonthAmountCents,
+                                    iconData: bucketData.icon.icon!,
+                                    perMonthAmountCents:
+                                        bucketData.perMonthAmountCents,
+                                    id: bucketData.id,
+                                  );
+                                }));
+
+                                for (final bucket in newBuckets) {
+                                  transaction.update(
+                                    Bucket.dbCollection.doc(bucket.id),
+                                    bucket.toJson());
+                                }
+
+                                print("JAMIN: ${newBuckets.map((b) => b.toJson())}");
+                              });
+
+                              await Month.update(Month(
+                                month: widget.month.month,
+                                expenses: [],
+                                allAccountsTotal: widget.month.allAccountsTotal,
+                                bucketTransferDate: DateTime.now(),
+                              ));
+                            },
+                            child: const Text(
+                                "Transfer monthly amounts into each bucket")),
+                      )
                     : Text(
                         "Bucket amount transfer completed on ${widget.month.bucketTransferDate!.toString()}")),
           ],

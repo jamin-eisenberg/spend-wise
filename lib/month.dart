@@ -58,7 +58,6 @@ class Month extends StatelessWidget {
 
   static Future<String> update(Month month) async {
     final id = Month.format(month.month).replaceAll("/", "-");
-    print("JAMIN: $month");
     await dbCollection.doc(id).set(month);
     return id;
   }
