@@ -10,17 +10,47 @@ class Month extends StatelessWidget {
   final DateTime month;
   final List<Expense> expenses;
   final num? allAccountsTotal;
+  final DateTime? bucketTransferDate;
 
   const Month({
     super.key,
     required this.month,
     required this.expenses,
     this.allAccountsTotal,
+    this.bucketTransferDate,
   });
 
-  static final CollectionReference<Map<String, dynamic>> dbCollection =
-      FirebaseFirestore.instance
-          .collection('users/${FirebaseAuth.instance.currentUser!.uid}/months');
+  static final CollectionReference<Month> dbCollection = FirebaseFirestore
+      .instance
+      .collection('users/${FirebaseAuth.instance.currentUser!.uid}/months')
+      .withConverter(
+          fromFirestore: (snapshot, _) =>
+              Month.fromJson(snapshot.data() ?? {}, snapshot.id),
+          toFirestore: (m, _) => m.toJson());
+
+  static Month fromJson(Map<String, dynamic> json, String id) {
+    var monthYear = id.split("-");
+    return Month(
+      month: DateTime(int.parse(monthYear[1]), int.parse(monthYear[0])),
+      expenses: [], // will be filled in before being displayed
+      allAccountsTotal: json['allAccountsTotal'] as num?,
+      bucketTransferDate: (json['bucketTransferDate'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'allAccountsTotal': allAccountsTotal,
+      'bucketTransferDate': bucketTransferDate == null
+          ? null
+          : Timestamp.fromDate(bucketTransferDate!),
+    };
+  }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Month{month: $month, expenses: $expenses, allAccountsTotal: $allAccountsTotal, bucketTransferDate: $bucketTransferDate}';
+  }
 
   static String format(DateTime month) {
     return "${month.month.toString().padLeft(2, "0")}/${month.year}";
@@ -28,10 +58,8 @@ class Month extends StatelessWidget {
 
   static Future<String> update(Month month) async {
     final id = Month.format(month.month).replaceAll("/", "-");
-    await dbCollection.doc(id).set({
-      'month': Timestamp.fromDate(month.month),
-      'allAccountsTotal': month.allAccountsTotal,
-    });
+    print("JAMIN: $month");
+    await dbCollection.doc(id).set(month);
     return id;
   }
 
@@ -60,7 +88,8 @@ class Month extends StatelessWidget {
         ),
         subtitle: allAccountsTotal == null
             ? null
-            : Text("Accounts total: ${Expense.formattedCost(allAccountsTotal!)}"),
+            : Text(
+                "Accounts total: ${Expense.formattedCost(allAccountsTotal!)}"),
       ),
     );
   }

@@ -32,12 +32,14 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                 final rawAllAccountsTotal = int.parse(
                     allAccountsTotalCents.text.replaceAll(RegExp(r"[,.]"), ""));
                 final allAccountsTotal =
-                hasCents ? rawAllAccountsTotal : rawAllAccountsTotal * 100;
+                    hasCents ? rawAllAccountsTotal : rawAllAccountsTotal * 100;
 
                 final month = Month(
                   month: widget.month.month,
-                    allAccountsTotal: allAccountsTotal,
-                    expenses: widget.month.expenses,);
+                  allAccountsTotal: allAccountsTotal,
+                  expenses: widget.month.expenses,
+                  bucketTransferDate: widget.month.bucketTransferDate,
+                );
 
                 widget.updateDb(month);
 
@@ -58,7 +60,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
             Form(
               key: _formKey,
               child:
-              Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Row(children: [
                   const Text("Total in all accounts: "),
                   const SizedBox(width: 10),
@@ -73,7 +75,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                       controller: allAccountsTotalCents,
                       validator: (amount) {
                         if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                            .firstMatch(allAccountsTotalCents.text)?[0] ==
+                                .firstMatch(allAccountsTotalCents.text)?[0] ==
                             allAccountsTotalCents.text) {
                           return null;
                         } else {
@@ -85,6 +87,20 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                 ]),
               ]),
             ),
+            const SizedBox(height: 20),
+            Center(
+                child: widget.month.bucketTransferDate == null
+                    ? ElevatedButton(
+                        onPressed: () => Month.update(Month(
+                              month: widget.month.month,
+                              expenses: [],
+                              allAccountsTotal: widget.month.allAccountsTotal,
+                              bucketTransferDate: DateTime.now(),
+                            )),
+                        child: const Text(
+                            "Transfer monthly amounts into each bucket"))
+                    : Text(
+                        "Bucket amount transfer completed on ${widget.month.bucketTransferDate!.toString()}")),
           ],
         ),
       ),

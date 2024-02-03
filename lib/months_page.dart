@@ -5,10 +5,9 @@ import 'month.dart';
 
 class MonthsPage extends StatelessWidget {
   final List<Expense> expenses;
-  final Map<DateTime, num> monthAmounts;
+  final List<Month> months;
 
-  const MonthsPage(
-      {super.key, required this.expenses, required this.monthAmounts});
+  const MonthsPage({super.key, required this.expenses, required this.months});
 
   List<DateTime> getMonthsBetween(DateTime start, DateTime end) {
     var curr = start;
@@ -23,6 +22,8 @@ class MonthsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    matchingFromDb(date) => months.where((m) => m.month == date).firstOrNull;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -31,12 +32,12 @@ class MonthsPage extends StatelessWidget {
       body: Center(
         child: ListView(
           children: [
-            for (var date
-                in getMonthsBetween(DateTime(2024), DateTime.now()))
+            for (var date in getMonthsBetween(DateTime(2024), DateTime.now()))
               Month(
                 month: date,
                 expenses: expenses.where((e) => e.forMonth == date).toList(),
-                allAccountsTotal: monthAmounts[date],
+                allAccountsTotal: matchingFromDb(date)?.allAccountsTotal,
+                bucketTransferDate: matchingFromDb(date)?.bucketTransferDate,
               )
           ],
         ),

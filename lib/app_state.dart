@@ -23,7 +23,7 @@ class ApplicationState extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _bucketsSubscription;
   List<Bucket> _buckets = [];
   StreamSubscription<QuerySnapshot>? _monthAmountsSubscription;
-  Map<DateTime, num> _monthAmounts = {};
+  List<Month> _months = [];
 
   bool get loggedIn => _loggedIn;
 
@@ -31,7 +31,7 @@ class ApplicationState extends ChangeNotifier {
 
   List<Bucket> get buckets => _buckets;
 
-  Map<DateTime, num> get monthAmounts => _monthAmounts;
+  List<Month> get months => _months;
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -52,21 +52,16 @@ class ApplicationState extends ChangeNotifier {
           log("EXPENSES: $_expenses");
           notifyListeners();
         });
-        _bucketsSubscription = Bucket.dbCollection
-            .orderBy('name')
-            .snapshots()
-            .listen((event) {
+        _bucketsSubscription =
+            Bucket.dbCollection.orderBy('name').snapshots().listen((event) {
           _buckets = event.docs.map((b) => b.data()).toList();
           log("BUCKETS: $_buckets");
           notifyListeners();
         });
         _monthAmountsSubscription =
             Month.dbCollection.snapshots().listen((event) {
-          _monthAmounts = {
-            for (var json in event.docs.map((m) => m.data()))
-              (json['month'] as Timestamp).toDate(): json['allAccountsTotal']
-          };
-          log("MONTH AMOUNTS: $_monthAmounts");
+          _months = event.docs.map((m) => m.data()).toList();
+          log("MONTH AMOUNTS: $_months");
           notifyListeners();
         });
       } else {
@@ -75,7 +70,7 @@ class ApplicationState extends ChangeNotifier {
         _expensesSubscription?.cancel();
         _buckets = [];
         _bucketsSubscription?.cancel();
-        _monthAmounts = {};
+        _months = [];
         _monthAmountsSubscription?.cancel();
       }
       notifyListeners();
