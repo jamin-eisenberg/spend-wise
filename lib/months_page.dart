@@ -20,6 +20,15 @@ class MonthsPage extends StatelessWidget {
     return dates;
   }
 
+  List<(T, T?)> twoSlidingWindow<T>(List<T> ls) {
+    List<(T, T?)> res = [];
+    for (final (i, x) in ls.sublist(1).indexed) {
+      res.add((ls[i], x));
+    }
+    res.add((ls.last, null));
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
     matchingFromDb(date) => months.where((m) => m.month == date).firstOrNull;
@@ -32,12 +41,20 @@ class MonthsPage extends StatelessWidget {
       body: Center(
         child: ListView(
           children: [
-            for (var date in getMonthsBetween(DateTime(2024), DateTime.now()))
+            for (var (date, nextDate) in twoSlidingWindow(getMonthsBetween(DateTime(2024), DateTime.now())))
               Month(
                 month: date,
                 expenses: expenses.where((e) => e.forMonth == date).toList(),
                 allAccountsTotal: matchingFromDb(date)?.allAccountsTotal,
+                estimatedMonthlyIncome: matchingFromDb(date)?.estimatedMonthlyIncome,
                 bucketTransferDate: matchingFromDb(date)?.bucketTransferDate,
+                nextMonth: nextDate == null ? null : Month(
+                  month: nextDate,
+                  expenses: expenses.where((e) => e.forMonth == nextDate).toList(),
+                  allAccountsTotal: matchingFromDb(nextDate)?.allAccountsTotal,
+                  estimatedMonthlyIncome: matchingFromDb(nextDate)?.estimatedMonthlyIncome,
+                  bucketTransferDate: matchingFromDb(nextDate)?.bucketTransferDate,
+                ),
               )
           ],
         ),

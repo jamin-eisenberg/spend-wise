@@ -31,11 +31,7 @@ class _BucketDetailsPageState extends State<BucketDetailsPage> {
           IconButton(
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
-                final hasCents = perMonthAmountCents.text.contains(".");
-                final rawPerMonthAmount = int.parse(
-                    perMonthAmountCents.text.replaceAll(RegExp(r"[,.]"), ""));
-                final perMonthAmount =
-                    hasCents ? rawPerMonthAmount : rawPerMonthAmount * 100;
+                final perMonthAmount = Expense.centsFromText(perMonthAmountCents.text);
 
                 final bucket = Bucket(
                     name: widget.bucket.name,

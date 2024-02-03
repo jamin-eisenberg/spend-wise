@@ -37,10 +37,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
           IconButton(
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
-                final costHasCents = centsCost.text.contains(".");
-                final rawCost =
-                    int.parse(centsCost.text.replaceAll(RegExp(r"[,.]"), ""));
-                final cost = costHasCents ? rawCost : rawCost * 100;
+                final cost = Expense.centsFromText(centsCost.text);
 
                 final expense = Expense(
                   name: name.text,

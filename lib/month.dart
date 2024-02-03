@@ -10,7 +10,9 @@ class Month extends StatelessWidget {
   final DateTime month;
   final List<Expense> expenses;
   final num? allAccountsTotal;
+  final num? estimatedMonthlyIncome;
   final DateTime? bucketTransferDate;
+  final Month? nextMonth;
 
   const Month({
     super.key,
@@ -18,6 +20,8 @@ class Month extends StatelessWidget {
     required this.expenses,
     this.allAccountsTotal,
     this.bucketTransferDate,
+    this.nextMonth,
+    this.estimatedMonthlyIncome,
   });
 
   static final CollectionReference<Month> dbCollection = FirebaseFirestore
@@ -34,6 +38,7 @@ class Month extends StatelessWidget {
       month: DateTime(int.parse(monthYear[1]), int.parse(monthYear[0])),
       expenses: [], // will be filled in before being displayed
       allAccountsTotal: json['allAccountsTotal'] as num?,
+      estimatedMonthlyIncome: json['estimatedMonthlyIncome'] as num?,
       bucketTransferDate: (json['bucketTransferDate'] as Timestamp?)?.toDate(),
     );
   }
@@ -41,6 +46,7 @@ class Month extends StatelessWidget {
   Map<String, dynamic> toJson() {
     return {
       'allAccountsTotal': allAccountsTotal,
+      'estimatedMonthlyIncome': estimatedMonthlyIncome,
       'bucketTransferDate': bucketTransferDate == null
           ? null
           : Timestamp.fromDate(bucketTransferDate!),
@@ -49,7 +55,7 @@ class Month extends StatelessWidget {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Month{month: $month, expenses: $expenses, allAccountsTotal: $allAccountsTotal, bucketTransferDate: $bucketTransferDate}';
+    return 'Month{month: $month, expenses: $expenses, allAccountsTotal: $allAccountsTotal, bucketTransferDate: $bucketTransferDate, estimatedMonthlyIncome: $estimatedMonthlyIncome}';
   }
 
   static String format(DateTime month) {
@@ -72,6 +78,7 @@ class Month extends StatelessWidget {
             builder: (s) => MonthDetailsPage(
               month: this,
               updateDb: update,
+              nextMonth: nextMonth,
             ),
           ),
         );

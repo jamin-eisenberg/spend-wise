@@ -78,6 +78,12 @@ class Expense extends StatelessWidget {
         id: id);
   }
 
+  static num centsFromText(String text) {
+    final hasCents = text.contains(".");
+    final total = int.parse(text.replaceAll(RegExp(r"[,.]"), ""));
+    return hasCents ? total : total * 100;
+  }
+
   static updateBucketCents(
       Transaction transaction, String bucketId, num positiveDiff) async {
     var bucketDoc = Bucket.dbCollection.doc(bucketId);
