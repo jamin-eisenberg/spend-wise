@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
+import 'bucket.dart';
 import 'buckets_page.dart';
 import 'expenses_page.dart';
 import 'home_page.dart';
