@@ -84,6 +84,14 @@ class Expense extends StatelessWidget {
     return hasCents ? total : total * 100;
   }
 
+  static String? currencyValidator(String text) {
+    if (RegExp(r"-?[\d,]+(\.\d{2})?").firstMatch(text)?[0] == text) {
+      return null;
+    } else {
+      return "Incorrect format for currency. Example: 1,234.56";
+    }
+  }
+
   static updateBucketCents(
       Transaction transaction, String bucketId, num positiveDiff) async {
     var bucketDoc = Bucket.dbCollection.doc(bucketId);
@@ -96,6 +104,7 @@ class Expense extends StatelessWidget {
           amountCents: bucket.amountCents + positiveDiff,
           iconData: bucket.icon.icon!,
           perMonthAmountCents: bucket.perMonthAmountCents,
+          goalCents: bucket.goalCents,
         ));
   }
 
@@ -128,6 +137,7 @@ class Expense extends StatelessWidget {
                   bucket2.amountCents - newExpense.centsCost + centsCost,
               iconData: bucket2.icon.icon!,
               perMonthAmountCents: bucket2.perMonthAmountCents,
+              goalCents: bucket2.goalCents,
             ));
       } else {
         transaction.set(
@@ -137,6 +147,7 @@ class Expense extends StatelessWidget {
               amountCents: bucket1.amountCents + centsCost,
               iconData: bucket1.icon.icon!,
               perMonthAmountCents: bucket1.perMonthAmountCents,
+              goalCents: bucket1.goalCents,
             ));
 
         transaction.set(
@@ -146,6 +157,7 @@ class Expense extends StatelessWidget {
               amountCents: bucket2.amountCents - newExpense.centsCost,
               iconData: bucket2.icon.icon!,
               perMonthAmountCents: bucket2.perMonthAmountCents,
+              goalCents: bucket2.goalCents,
             ));
       }
 

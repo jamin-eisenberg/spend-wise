@@ -84,15 +84,7 @@ class _ExpenseDetailsPageState extends State<ExpenseDetailsPage> {
                   onTapOutside: (_) => centsCost.text =
                       Expense.formattedCostString(centsCost.text, false),
                   controller: centsCost,
-                  validator: (amount) {
-                    if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                            .firstMatch(centsCost.text)?[0] ==
-                        centsCost.text) {
-                      return null;
-                    } else {
-                      return "Incorrect format for currency. Example: 1,234.56";
-                    }
-                  },
+                  validator: (_) => Expense.currencyValidator(centsCost.text),
                 ),
               ),
             ]),

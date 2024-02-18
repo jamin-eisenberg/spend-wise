@@ -87,15 +87,8 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                           Expense.formattedCostString(
                               allAccountsTotalCents.text, false),
                       controller: allAccountsTotalCents,
-                      validator: (amount) {
-                        if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                                .firstMatch(allAccountsTotalCents.text)?[0] ==
-                            allAccountsTotalCents.text) {
-                          return null;
-                        } else {
-                          return "Incorrect format for currency. Example: 1,234.56";
-                        }
-                      },
+                      validator: (_) =>
+                          Expense.currencyValidator(allAccountsTotalCents.text),
                     ),
                   ),
                 ]),
@@ -111,15 +104,8 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                           Expense.formattedCostString(
                               estimatedMonthlyIncomeCents.text, false),
                       controller: estimatedMonthlyIncomeCents,
-                      validator: (amount) {
-                        if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                                .firstMatch(estimatedMonthlyIncomeCents.text)?[0] ==
-                            estimatedMonthlyIncomeCents.text) {
-                          return null;
-                        } else {
-                          return "Incorrect format for currency. Example: 1,234.56";
-                        }
-                      },
+                      validator: (amount) => Expense.currencyValidator(
+                          estimatedMonthlyIncomeCents.text),
                     ),
                   ),
                 ]),
@@ -147,6 +133,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                                 perMonthAmountCents:
                                     bucketData.perMonthAmountCents,
                                 id: bucketData.id,
+                                goalCents: bucketData.goalCents,
                               );
                             }));
 
@@ -164,7 +151,8 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                             month: widget.month.month,
                             expenses: [],
                             allAccountsTotal: widget.month.allAccountsTotal,
-                            estimatedMonthlyIncome: widget.month.estimatedMonthlyIncome,
+                            estimatedMonthlyIncome:
+                                widget.month.estimatedMonthlyIncome,
                             bucketTransferDate: DateTime.now(),
                           ));
 
@@ -181,7 +169,8 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                       : "Bucket amount transfer completed on ${widget.month.bucketTransferDate!.toString()}"),
             ),
             const SizedBox(height: 30),
-            Text("${Month.format(widget.month.month)} expenses total: ${Expense.formattedCost(widget.month.expenses.map((e) => e.centsCost).sum)}"),
+            Text(
+                "${Month.format(widget.month.month)} expenses total: ${Expense.formattedCost(widget.month.expenses.map((e) => e.centsCost).sum)}"),
             if (widget.nextMonth != null)
               Text(
                   "${Month.format(widget.nextMonth!.month)} account total: ${Expense.formattedCost(widget.nextMonth?.allAccountsTotal ?? 0)}"),

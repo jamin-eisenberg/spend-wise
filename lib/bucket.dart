@@ -10,6 +10,7 @@ class Bucket extends StatelessWidget {
   final String name;
   final num amountCents;
   final num perMonthAmountCents;
+  final num goalCents;
 
   String id;
 
@@ -27,7 +28,8 @@ class Bucket extends StatelessWidget {
       required this.amountCents,
       required IconData iconData,
       this.id = "not a valid bucket ID",
-      required this.perMonthAmountCents}) {
+      required this.perMonthAmountCents,
+      required this.goalCents}) {
     icon = Icon(iconData);
   }
 
@@ -39,6 +41,7 @@ class Bucket extends StatelessWidget {
       amountCents: json['amountCents'],
       id: id,
       perMonthAmountCents: json['perMonthAmountCents'] as num,
+      goalCents: json['goalCents'],
     );
   }
 
@@ -48,6 +51,7 @@ class Bucket extends StatelessWidget {
       'iconCodePoint': icon.icon!.codePoint,
       'amountCents': amountCents,
       'perMonthAmountCents': perMonthAmountCents,
+      'goalCents': goalCents,
     };
   }
 
@@ -85,6 +89,7 @@ class Bucket extends StatelessWidget {
             Text(Expense.formattedCost(amountCents)),
           ],
         ),
+        subtitle: LinearProgressIndicator(value: goalCents == 0 ? 1 : amountCents / goalCents),
       ),
     );
   }

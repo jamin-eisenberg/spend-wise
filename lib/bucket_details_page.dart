@@ -19,6 +19,8 @@ class BucketDetailsPage extends StatefulWidget {
 class _BucketDetailsPageState extends State<BucketDetailsPage> {
   late final perMonthAmountCents = TextEditingController(
       text: Expense.formattedCost(widget.bucket.perMonthAmountCents, false));
+  late final goalCents = TextEditingController(
+      text: Expense.formattedCost(widget.bucket.goalCents, false));
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,14 +33,17 @@ class _BucketDetailsPageState extends State<BucketDetailsPage> {
           IconButton(
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
-                final perMonthAmount = Expense.centsFromText(perMonthAmountCents.text);
+                final perMonthAmount =
+                    Expense.centsFromText(perMonthAmountCents.text);
+                final goalAmount = Expense.centsFromText(goalCents.text);
 
                 final bucket = Bucket(
                     name: widget.bucket.name,
                     amountCents: widget.bucket.amountCents,
                     iconData: widget.bucket.icon.icon!,
                     id: widget.bucket.id,
-                    perMonthAmountCents: perMonthAmount);
+                    perMonthAmountCents: perMonthAmount,
+                    goalCents: goalAmount);
 
                 widget.updateDb(bucket).then((value) => bucket.id = value);
 
@@ -66,21 +71,30 @@ class _BucketDetailsPageState extends State<BucketDetailsPage> {
                   const Text("\$"),
                   Expanded(
                     child: TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        keyboardType: TextInputType.number,
+                        onTapOutside: (_) => perMonthAmountCents.text =
+                            Expense.formattedCostString(
+                                perMonthAmountCents.text, false),
+                        controller: perMonthAmountCents,
+                        validator: (_) => Expense.currencyValidator(
+                            perMonthAmountCents.text)),
+                  ),
+                ]),
+                Row(children: [
+                  const Text("Goal: "),
+                  const SizedBox(width: 10),
+                  const Text("\$"),
+                  Expanded(
+                    child: TextFormField(
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.number,
-                      onTapOutside: (_) => perMonthAmountCents.text =
+                      onTapOutside: (_) => goalCents.text =
                           Expense.formattedCostString(
-                              perMonthAmountCents.text, false),
-                      controller: perMonthAmountCents,
-                      validator: (amount) {
-                        if (RegExp(r"-?[\d,]+(\.\d{2})?")
-                                .firstMatch(perMonthAmountCents.text)?[0] ==
-                            perMonthAmountCents.text) {
-                          return null;
-                        } else {
-                          return "Incorrect format for currency. Example: 1,234.56";
-                        }
-                      },
+                              goalCents.text, false),
+                      controller: goalCents,
+                      validator: (_) =>
+                          Expense.currencyValidator(goalCents.text),
                     ),
                   ),
                 ]),
