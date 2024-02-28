@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:spend_wise/expense_details_page.dart';
 
@@ -8,7 +9,8 @@ class ExpensesPage extends StatelessWidget {
   final List<Bucket> buckets;
   final List<Expense> expenses;
 
-  const ExpensesPage({super.key, required this.buckets, required this.expenses});
+  const ExpensesPage(
+      {super.key, required this.buckets, required this.expenses});
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,11 @@ class ExpensesPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Expenses"),
+        actions: [
+          IconButton(
+              onPressed: () async => await FirebaseAuth.instance.signOut(),
+              icon: const Icon(Icons.logout))
+        ],
       ),
       body: Center(
         child: ListView(
@@ -36,7 +43,8 @@ class ExpensesPage extends StatelessWidget {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (s) => const ExpenseDetailsPage(updateDb: Expense.insert),
+              builder: (s) =>
+                  const ExpenseDetailsPage(updateDb: Expense.insert),
             ),
           );
         },
