@@ -42,16 +42,16 @@ class ApplicationState extends ChangeNotifier {
     ]);
 
     // final buckets = [
-    //   Bucket(perMonthAmountCents: 0, name: "House", iconData: Icons.house, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Wedding", iconData: Icons.favorite, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Vacation", iconData: Icons.flight_takeoff, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Car Savings/Repairs", iconData: Icons.car_repair, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Car Insurance", iconData: Icons.health_and_safety, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Car Taxes", iconData: Icons.gavel, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Invisalign", iconData: Icons.bluetooth_disabled, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Emergency Fund", iconData: Icons.emergency, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Retirement (Roth IRA)", iconData: Icons.elderly, amountCents: 0),
-    //   Bucket(perMonthAmountCents: 0, name: "Charity", iconData: Icons.volunteer_activism, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "House", iconData: Icons.house, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Wedding", iconData: Icons.favorite, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Vacation", iconData: Icons.flight_takeoff, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Car Savings/Repairs", iconData: Icons.car_repair, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Car Insurance", iconData: Icons.health_and_safety, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Car Taxes", iconData: Icons.gavel, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Invisalign", iconData: Icons.bluetooth_disabled, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Emergency Fund", iconData: Icons.emergency, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Retirement (Roth IRA)", iconData: Icons.elderly, amountCents: 0),
+    //   Bucket(goalCents: 0, perMonthAmountCents: 0, name: "Charity", iconData: Icons.volunteer_activism, amountCents: 0),
     // ];
     //
     // for (final bucket in buckets) {

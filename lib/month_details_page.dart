@@ -142,9 +142,6 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                                   Bucket.dbCollection.doc(bucket.id),
                                   bucket.toJson());
                             }
-
-                            print(
-                                "JAMIN: ${newBuckets.map((b) => b.toJson())}");
                           });
 
                           await Month.update(Month(
