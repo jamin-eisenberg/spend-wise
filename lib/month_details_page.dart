@@ -53,6 +53,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
                   estimatedMonthlyIncome: estimatedMonthlyIncome,
                   expenses: widget.month.expenses,
                   bucketTransferDate: widget.month.bucketTransferDate,
+                  bucketAmounts: widget.month.bucketAmounts,
                 );
 
                 widget.updateDb(month);
@@ -116,47 +117,7 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
               child: widget.month.bucketTransferDate == null && !buttonPressed
                   ? Consumer<ApplicationState>(
                       builder: (_, appState, __) => ElevatedButton(
-                        onPressed: () async {
-                          await FirebaseFirestore.instance
-                              .runTransaction((transaction) async {
-                            List<Bucket> newBuckets = await Future.wait(
-                                appState.buckets.map((bucket) async {
-                              final bucketDoc = await transaction
-                                  .get(Bucket.dbCollection.doc(bucket.id));
-                              final bucketData = bucketDoc.data()!;
-
-                              return Bucket(
-                                name: bucketData.name,
-                                amountCents: bucketData.amountCents +
-                                    bucketData.perMonthAmountCents,
-                                iconData: bucketData.icon.icon!,
-                                perMonthAmountCents:
-                                    bucketData.perMonthAmountCents,
-                                id: bucketData.id,
-                                goalCents: bucketData.goalCents,
-                              );
-                            }));
-
-                            for (final bucket in newBuckets) {
-                              transaction.update(
-                                  Bucket.dbCollection.doc(bucket.id),
-                                  bucket.toJson());
-                            }
-                          });
-
-                          await Month.update(Month(
-                            month: widget.month.month,
-                            expenses: [],
-                            allAccountsTotal: widget.month.allAccountsTotal,
-                            estimatedMonthlyIncome:
-                                widget.month.estimatedMonthlyIncome,
-                            bucketTransferDate: DateTime.now(),
-                          ));
-
-                          setState(() {
-                            buttonPressed = true;
-                          });
-                        },
+                        onPressed: () async => await updateForMonth(appState),
                         child: const Text(
                             "Transfer monthly amounts into each bucket"),
                       ),
@@ -183,5 +144,43 @@ class _MonthDetailsPageState extends State<MonthDetailsPage> {
         ),
       ),
     );
+  }
+
+  updateForMonth(ApplicationState appState) async {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      List<Bucket> newBuckets =
+          await Future.wait(appState.buckets.map((bucket) async {
+        final bucketDoc =
+            await transaction.get(Bucket.dbCollection.doc(bucket.id));
+        final bucketData = bucketDoc.data()!;
+
+        return Bucket(
+          name: bucketData.name,
+          amountCents: bucketData.amountCents + bucketData.perMonthAmountCents,
+          iconData: bucketData.icon.icon!,
+          perMonthAmountCents: bucketData.perMonthAmountCents,
+          id: bucketData.id,
+          goalCents: bucketData.goalCents,
+        );
+      }));
+
+      for (final bucket in newBuckets) {
+        transaction.update(Bucket.dbCollection.doc(bucket.id), bucket.toJson());
+      }
+    });
+
+    await Month.update(Month(
+        month: widget.month.month,
+        expenses: [],
+        allAccountsTotal: widget.month.allAccountsTotal,
+        estimatedMonthlyIncome: widget.month.estimatedMonthlyIncome,
+        bucketTransferDate: DateTime.now(),
+        bucketAmounts: {
+          for (final bucket in appState.buckets)
+            bucket.id: (bucket.amountCents, bucket.perMonthAmountCents)
+        }));
+    setState(() {
+      buttonPressed = true;
+    });
   }
 }

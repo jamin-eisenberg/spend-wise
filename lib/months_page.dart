@@ -72,6 +72,7 @@ class MonthsPage extends StatelessWidget {
                           matchingFromDb(date)?.estimatedMonthlyIncome,
                       bucketTransferDate:
                           matchingFromDb(date)?.bucketTransferDate,
+                      bucketAmounts: matchingFromDb(date)?.bucketAmounts,
                       nextMonth: nextDate == null
                           ? null
                           : Month(
@@ -85,6 +86,7 @@ class MonthsPage extends StatelessWidget {
                                   ?.estimatedMonthlyIncome,
                               bucketTransferDate:
                                   matchingFromDb(nextDate)?.bucketTransferDate,
+                              bucketAmounts: matchingFromDb(nextDate)?.bucketAmounts,
                             ),
                     )
                 ],

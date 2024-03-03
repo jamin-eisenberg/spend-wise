@@ -14,14 +14,18 @@ class Month extends StatelessWidget {
   final DateTime? bucketTransferDate;
   final Month? nextMonth;
 
+  // bucketId -> (amount before transfer for this month, transfer amount this month)
+  final Map<String, (num, num)>? bucketAmounts;
+
   const Month({
     super.key,
     required this.month,
     required this.expenses,
-    this.allAccountsTotal,
-    this.bucketTransferDate,
+    required this.allAccountsTotal,
+    required this.bucketTransferDate,
     this.nextMonth,
-    this.estimatedMonthlyIncome,
+    required this.estimatedMonthlyIncome,
+    required this.bucketAmounts,
   });
 
   static final CollectionReference<Month> dbCollection = FirebaseFirestore
@@ -33,13 +37,21 @@ class Month extends StatelessWidget {
           toFirestore: (m, _) => m.toJson());
 
   static Month fromJson(Map<String, dynamic> json, String id) {
-    var monthYear = id.split("-");
+    final monthYear = id.split("-");
+    final bucketAmounts = json['bucketAmounts'] as Map<String, dynamic>?;
     return Month(
       month: DateTime(int.parse(monthYear[1]), int.parse(monthYear[0])),
-      expenses: [], // will be filled in before being displayed
+      expenses: [],
+      // will be filled in before being displayed
       allAccountsTotal: json['allAccountsTotal'] as num?,
       estimatedMonthlyIncome: json['estimatedMonthlyIncome'] as num?,
       bucketTransferDate: (json['bucketTransferDate'] as Timestamp?)?.toDate(),
+      bucketAmounts: bucketAmounts == null
+          ? null
+          : {
+              for (final entry in bucketAmounts.entries)
+                entry.key: (entry.value[0], entry.value[1])
+            },
     );
   }
 
@@ -50,6 +62,10 @@ class Month extends StatelessWidget {
       'bucketTransferDate': bucketTransferDate == null
           ? null
           : Timestamp.fromDate(bucketTransferDate!),
+      'bucketAmounts': bucketAmounts == null ? null : {
+        for (final entry in bucketAmounts!.entries)
+          entry.key: [entry.value.$1, entry.value.$2]
+      }
     };
   }
 
