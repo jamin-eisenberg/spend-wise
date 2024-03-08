@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:spend_wise/expense.dart';
+import 'package:http/http.dart' as http;
 
 import 'bucket.dart';
 import 'month.dart';
@@ -36,6 +40,26 @@ class MonthsPage extends StatelessWidget {
     return res;
   }
 
+  Future<void> exportToSpreadsheet() {
+    return http.post(
+      Uri.parse('https://script.google.com/macros/s/AKfycbzCBlozl_Z3JLj5b-lDyL8FgexlPG51zDnBc2YB4wj6-tyc4pilcDmCBuFsIVZfDazRJA/exec'),
+      body: jsonEncode({
+        'buckets': buckets.map((bucket) => {
+          'name': bucket.name,
+          'months': months.map((month) => {
+            'month': Month.format(month.month),
+            'spent': month.expenses.where((e) => e.bucketId == bucket.id).map((e) => e.centsCost).sum,
+            'amountCents': month.bucketAmounts?[bucket.id]?.$1 ?? 0,
+            'perMonthAmountCents': month.bucketAmounts?[bucket.id]?.$2 ?? 0,
+          }).toList()
+        }).toList(),
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     matchingFromDb(date) => months.where((m) => m.month == date).firstOrNull;
@@ -44,6 +68,9 @@ class MonthsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Months"),
+        actions: [
+          IconButton(onPressed: () async => await exportToSpreadsheet(), icon: const Icon(Icons.file_upload))
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
