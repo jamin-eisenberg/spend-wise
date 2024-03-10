@@ -48,7 +48,7 @@ class MonthsPage extends StatelessWidget {
           'name': bucket.name,
           'months': months.map((month) => {
             'month': Month.format(month.month),
-            'spent': month.expenses.where((e) => e.bucketId == bucket.id).map((e) => e.centsCost).sum,
+            'spent': expenses.where((e) => e.bucketId == bucket.id && e.forMonth == month.month).map((e) => e.centsCost).sum,
             'amountCents': month.bucketAmounts?[bucket.id]?.$1 ?? 0,
             'perMonthAmountCents': month.bucketAmounts?[bucket.id]?.$2 ?? 0,
           }).toList()
